@@ -1,8 +1,3 @@
-# pip install -U streamlit
-# pip install -U plotly
-
-# you can run your app with: streamlit run app.py
-
 import streamlit as st
 import pickle
 import os
@@ -17,25 +12,23 @@ if "show_additional_pages" not in st.session_state:
 if st.sidebar.button("For Devs"):
     st.session_state.show_additional_pages = not st.session_state.show_additional_pages
 
-st.title("AAI1001 Data Engineering and Visualization Project")
-st.header("Cardiovascular Diseases Prediction via Electrocardiogram")
+st.title("AAI3003 Natural Language Processing (NLP)")
+st.header("Spam Detection Analysis using Natural Language Processing")
 
 st.markdown(
     """
     Done by:\n
     👧 LEO EN QI VALERIE                [2202795]\n
     👧 TEO XUANTING                     [2202217]\n
-    TIAN YUE XIAO, BRYON                [2201615]\n
-    👧SERI HANZALAH BTE HANIFFAH        [2201601]
+    👦 TIAN YUE XIAO, BRYON             [2201615]\n
+    👧 SERI HANZALAH BTE HANIFFAH       [2201601]
     """
 )
 
 st.markdown(
     """
-    This project aims to design a minimal viable product (MVP) 
-    of a trained Machine Learning (ML) model with a Graphical User Interface (GUI) 
-    to predict heart disease. It addresses the need for accurate detection, 
-    objective assessments, and efficient usage of resources in diagnosing heart disease.
+    This project aims to conduct a performance analysis on Spam Detection through Natural Language Processing.
+    It addresses the need for accurate detection, objective assessments, and efficient usage of resources in spam detection.
     """
 )
 
@@ -49,7 +42,6 @@ if st.session_state.show_additional_pages:
     with open(normal_evaluation_path, "r") as file:
         code = file.read()
     exec(code)
-
 
 # loading the trained model
 model = pickle.load(open('model.pkl', 'rb'))
