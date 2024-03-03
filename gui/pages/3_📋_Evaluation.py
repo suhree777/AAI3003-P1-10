@@ -1,14 +1,17 @@
 import streamlit as st
-import pickle
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from devs.dataset import save_dataset  # Import the save_dataset function
 from transformers import pipeline
 import torch
+from sklearn.model_selection import train_test_split
 
 def evaluate_model(model, dataset):
-    X_test = dataset['test']['text']
-    y_test = dataset['test']['label']
+    X = dataset['train']['text']
+    y = dataset['train']['label']
+
+    # Split the dataset into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     if isinstance(model, pipeline):
         predictions = [result['label'] for result in model(X_test)]
@@ -44,7 +47,6 @@ def load_model(model_key):
         model = torch.load(model_path)
 
     return model
-
 
 def main():
     st.header("Model Evaluation")
