@@ -4,6 +4,6 @@ tensorflow==2.13.0
 numpy ==1.24.3
 transformers == 4.38.1
 scikit-learn == 1.4.1post1
-pickle
 safetensors
+h5py
 
