@@ -2,8 +2,7 @@ import streamlit as st
 import pickle
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from devs.dataset import save_dataset  # Import the get_dataset function
-
+from devs.dataset import save_dataset  # Import the save_dataset function
 
 def evaluate_model(model, dataset):
     X_test = dataset['test']['text']
@@ -30,11 +29,11 @@ def main():
 
     # Check if a model has been uploaded
     if 'uploaded_model' in st.session_state:
-        # Load the predefined dataset
-        dataset = save_dataset()
-
         # Load the uploaded model
-        model = pickle.load(st.session_state['uploaded_model'])
+        model = pickle.load(open(st.session_state['uploaded_model'].name, 'rb'))
+
+        # Load the dataset from devs/dataset.py
+        dataset = save_dataset()
 
         # Evaluate the model
         performance_metrics = evaluate_model(model, dataset)

@@ -12,7 +12,7 @@ st.markdown(
 # Return the dataset for use in other files
 
 def save_dataset():
-    dataset = load_dataset("SetFit/enron_spam")
+    dataset = load_dataset("sms_spam")
     return dataset
 
 # Load the dataset
@@ -20,7 +20,7 @@ dataset = save_dataset()
 
 # Convert the dataset to a Pandas DataFrame
 # Adjust the slice [:1000] to display a different number of rows
-df = pd.DataFrame(dataset['test'][:1000])
+df = pd.DataFrame(dataset['train'][:1000])
 
 # Display the DataFrame
 st.dataframe(df)
