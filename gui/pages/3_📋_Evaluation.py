@@ -52,34 +52,28 @@ def main():
     st.header("Model Evaluation")
 
     # Check if any models have been uploaded
-    model_keys = [key for key in st.session_state.keys() if key.startswith('uploaded_model_')]
-
-    if model_keys:
+    if 'models' in st.session_state:
         # Load the dataset from devs/dataset.py
         dataset = save_dataset()
 
-        # Iterate over each model key and evaluate the corresponding model
-        for key in model_keys:
-            model_path = st.session_state[key].name  # Get the file path from the UploadedFile object
-
+        # Iterate over each uploaded model and evaluate it
+        for model_name, model in st.session_state['models'].items():
             try:
-                model = load_model(model_path)
+                # Evaluate the model
+                performance_metrics = evaluate_model(model, dataset)
+
+                # Convert the metrics dictionary to a DataFrame for display
+                metrics_df = pd.DataFrame(performance_metrics)
+
+                # Display the model name and the performance evaluation analysis in a table
+                st.write(f"### Model: {model_name}")
+                st.table(metrics_df)
             except ValueError as e:
                 st.write(str(e))
-                continue
-
-            # Evaluate the model
-            performance_metrics = evaluate_model(model, dataset)
-
-            # Convert the metrics dictionary to a DataFrame for display
-            metrics_df = pd.DataFrame(performance_metrics)
-
-            # Display the model name and the performance evaluation analysis in a table
-            st.write(f"### Model: {model_path}")
-            st.table(metrics_df)
     else:
         # Display a message asking the user to upload a model in the 2_📥_Model.py page
         st.write("#### Please upload at least one model in", "<span style='color: red;'>📥 Model</span>.", unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
