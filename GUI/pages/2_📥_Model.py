@@ -26,22 +26,23 @@ st.title("Spam Detection Demo")
 sentence = st.text_input("Enter a sentence:")
 
 # Load the TfidfVectorizer from files
-with open('extensive_training/tfid_vectorizer.pkl', 'rb') as file:
+with open('GUI/extensive_training/tfid_vectorizer.pkl', 'rb') as file:
     tfid = pickle.load(file)
 
 # Define a dictionary mapping model names to their file paths
 model_paths = {
-    'LogisticRegression': 'extensive_training/LR_model.pkl',
-    'SupportVectorMachine': 'extensive_training/SVC_model.pkl',
-    'MultinomialNB': 'extensive_training/NB_model.pkl',
-    'DecisionTreeClassifiern': 'extensive_training/DT_model.pkl',
-    'AdaBoostClassifier': 'extensive_training/Adaboost_model.pkl',
-    'BaggingClassifier': 'extensive_training/Bgc_model.pkl',
-    'ExtraTreesClassifier': 'extensive_training/ETC_model.pkl',
-    'GradientBoostingClassifier': 'extensive_training/GBDT_model.pkl',
-    'XGBClassifier': 'extensive_training/xgb_model.pkl',
-    'RandomForestClassifier': 'extensive_training/RF_model.pkl'
+    'LogisticRegression': 'GUI/extensive_training/LR_model.pkl',
+    'SupportVectorMachine': 'GUI/extensive_training/SVC_model.pkl',
+    'MultinomialNB': 'GUI/extensive_training/NB_model.pkl',
+    'DecisionTreeClassifier': 'GUI/extensive_training/DT_model.pkl',  # Corrected here
+    'AdaBoostClassifier': 'GUI/extensive_training/Adaboost_model.pkl',
+    'BaggingClassifier': 'GUI/extensive_training/Bgc_model.pkl',
+    'ExtraTreesClassifier': 'GUI/extensive_training/ETC_model.pkl',
+    'GradientBoostingClassifier': 'GUI/extensive_training/GBDT_model.pkl',
+    'XGBClassifier': 'GUI/extensive_training/xgb_model.pkl',
+    'RandomForestClassifier': 'GUI/extensive_training/RF_model.pkl'
 }
+
 
 if st.button("Predict"):
     preprocessed_sentence = transform_text(sentence)
