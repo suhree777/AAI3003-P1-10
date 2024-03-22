@@ -7,6 +7,8 @@ import string
 import nltk
 from nltk.corpus import stopwords
 import pandas as pd
+from transformers import BertTokenizer, BertForSequenceClassification
+import torch
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -36,6 +38,27 @@ sentence = st.text_input("Enter a sentence:")
 with open('extensive_training/tfid_vectorizer.pkl', 'rb') as file:
     tfid = pickle.load(file)
 
+# Load the BERT tokenizer and model
+bert_tokenizer = BertTokenizer.from_pretrained('bert_model_files/')
+bert_model = BertForSequenceClassification.from_pretrained('bert_model_files/')
+
+import torch.nn.functional as F
+
+def bert_predict(sentence):
+    # Tokenize and encode the sentence
+    inputs = bert_tokenizer(sentence, return_tensors='pt', padding=True, truncation=True, max_length=512)
+    input_ids = inputs['input_ids']
+    attention_mask = inputs['attention_mask']
+
+    # Get the prediction from the BERT model
+    with torch.no_grad():
+        outputs = bert_model(input_ids, attention_mask=attention_mask)
+        prediction = torch.argmax(outputs.logits, dim=1).item()
+    
+    return 'Likely a Spam' if prediction == 1 else 'Likely Not a Spam'
+
+
+
 # Define a dictionary mapping model names to their file paths
 model_paths = {
     'LogisticRegression': 'extensive_training/LR_model.pkl',
@@ -47,7 +70,8 @@ model_paths = {
     'ExtraTreesClassifier': 'extensive_training/ETC_model.pkl',
     'GradientBoostingClassifier': 'extensive_training/GBDT_model.pkl',
     'XGBClassifier': 'extensive_training/xgb_model.pkl',
-    'RandomForestClassifier': 'extensive_training/RF_model.pkl'
+    'RandomForestClassifier': 'extensive_training/RF_model.pkl',
+    'BERT': 'bert'
 }
 
 if st.button("Predict"):
@@ -59,13 +83,17 @@ if st.button("Predict"):
 
     # Iterate over the models and perform predictions
     for model_name, model_path in model_paths.items():
-        with open(model_path, 'rb') as model_file:
-            model = pickle.load(model_file)
-            prediction = model.predict(numerical_features)
-            prediction_text = 'Likely a Spam' if prediction == 1 else 'Likely Not a Spam'
-            # Create a new DataFrame for the current prediction and concatenate it
-            new_row_df = pd.DataFrame({'Model': [model_name], 'Prediction': [prediction_text]})
-            results_df = pd.concat([results_df, new_row_df], ignore_index=True)
+        if model_name == 'BERT':
+            prediction_text = bert_predict(sentence)
+        else:
+            with open(model_path, 'rb') as model_file:
+                model = pickle.load(model_file)
+                prediction = model.predict(numerical_features)
+                prediction_text = 'Likely a Spam' if prediction == 1 else 'Likely Not a Spam'
+
+        # Create a new DataFrame for the current prediction and concatenate it
+        new_row_df = pd.DataFrame({'Model': [model_name], 'Prediction': [prediction_text]})
+        results_df = pd.concat([results_df, new_row_df], ignore_index=True)
 
     # Define a function to apply color based on the prediction value
     def highlight_spam(val):
