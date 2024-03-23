@@ -46,3 +46,54 @@ st.table(metrics_df.style.format({
     'F1 Score': '{:.2%}'  # Format the F1 score column as a percentage
 }))
 
+# Identify the best model based on the highest average of metrics
+best_model = metrics_df.set_index('Classifier').mean(axis=1).idxmax()
+
+def plot_accuracy():
+    st.write("### Accuracy of Models")
+    accuracy_chart_data = metrics_df[['Classifier', 'Accuracy']].set_index('Classifier')
+    st.bar_chart(accuracy_chart_data)
+
+def plot_precision():
+    st.write("### Precision of Models")
+    precision_chart_data = metrics_df[['Classifier', 'Precision']].set_index('Classifier')
+    st.bar_chart(precision_chart_data)
+
+def plot_recall():
+    st.write("### Recall of Models")
+    recall_chart_data = metrics_df[['Classifier', 'Recall']].set_index('Classifier')
+    st.bar_chart(recall_chart_data)
+
+def plot_f1_score():
+    st.write("### F1-score of Models")
+    f1_chart_data = metrics_df[['Classifier', 'F1']].set_index('Classifier')
+    st.bar_chart(f1_chart_data)
+
+def display_best_model():
+    classifier_full_names = {
+        "SVC": "Support Vector Classifier",
+        "KNN": "K-Nearest Neighbors",
+        "NB": "Naive Bayes",
+        "DT": "Decision Tree",
+        "LR": "Logistic Regression",
+        "RF": "Random Forest",
+        "Adaboost": "Adaptive Boosting",
+        "Bgc": "Bagging Classifier",
+        "ETC": "Extra Trees Classifier",
+        "GBDT": "Gradient Boosting Decision Tree",
+        "xgb": "XGBoost"
+    }
+
+    best_model_full_name = classifier_full_names.get(best_model, best_model)
+    st.info(f"Based on the average of the metrics, the best model is: **{best_model}** ({best_model_full_name})")
+
+
+def main():
+    display_best_model()
+    plot_accuracy()
+    plot_precision()
+    plot_recall()
+    plot_f1_score()
+
+if __name__ == "__main__":
+    main()
