@@ -20,4 +20,4 @@ xgboost
 
 nltk
 
-seaborn
+altair
