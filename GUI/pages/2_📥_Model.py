@@ -1,13 +1,14 @@
 import streamlit as st
 import pickle
 import numpy as np
-import torch
 from nltk.stem.porter import PorterStemmer
 import string
 import nltk
 from nltk.corpus import stopwords
 import pandas as pd
 from transformers import BertTokenizer, BertForSequenceClassification
+import matplotlib.pyplot as plt
+import torch
 
 nltk.download('punkt')
 nltk.download('stopwords')
