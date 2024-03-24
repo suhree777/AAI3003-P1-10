@@ -1,25 +1,25 @@
 import streamlit as st
 import pickle
-import numpy as np
+import pandas as pd
 from nltk.stem.porter import PorterStemmer
-import string
 import nltk
 from nltk.corpus import stopwords
-import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizer, BertForSequenceClassification
-import matplotlib.pyplot as plt
 import torch
 
+# Download necessary NLTK data
 nltk.download('punkt')
 nltk.download('stopwords')
 
+# Initialize PorterStemmer
 ps = PorterStemmer()
 
 def transform_text(text):
     text = text.lower()
     text = nltk.word_tokenize(text)
-    processed_text = [ps.stem(word) for word in text if word.isalnum() and word not in stopwords.words('english') and word not in string.punctuation]
-    return " ".join(processed_text)
+    text = [ps.stem(word) for word in text if word.isalnum() and word not in stopwords.words('english')]
+    return " ".join(text)
 
 # Load the TfidfVectorizer and BERT model
 with open('extensive_training/tfid_vectorizer.pkl', 'rb') as file:
