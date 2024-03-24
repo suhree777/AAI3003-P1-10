@@ -7,6 +7,7 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizer, BertForSequenceClassification
 import torch
+from st_aggrid import AgGrid, GridUpdateMode, JsCode
 
 # Download necessary NLTK data
 nltk.download('punkt')
@@ -71,16 +72,17 @@ st.markdown("Enter a sentence or upload a CSV file with sentences for spam detec
 sentence = st.text_input("Enter a sentence:")
 uploaded_file = st.file_uploader("Or upload a CSV file with sentences:", type=["csv"])
 
-if st.button("Predict"):
+if st.button("Predict") or 'results_df' in st.session_state:
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         if 'Sentence' in df.columns:
+            st.write("Results:")
             sentences = df['Sentence'].tolist()
         else:
             st.error("CSV file must have a column named 'Sentence'")
             sentences = []
     else:
-        sentences = [sentence]
+        sentences = [sentence] if sentence else []
 
     all_results = []
     for sent in sentences:
@@ -90,11 +92,38 @@ if st.button("Predict"):
         all_results.extend(results)
 
     results_df = pd.DataFrame(all_results)
-    def highlight_spam(val):
-        color = 'darkred' if val == 'Likely a Spam' else 'darkgreen'
-        return f'background-color: {color}'
+    st.session_state['results_df'] = results_df  # Save results in session state
 
-    if len(sentences) == 1 and uploaded_file is None:
-        st.dataframe(results_df.drop(columns=['Sentence']).style.applymap(highlight_spam, subset=['Prediction']))
-    else:
-        st.dataframe(results_df.style.applymap(highlight_spam, subset=['Prediction']))
+    # Define custom cell style based on the prediction
+    cell_style_jscode = JsCode("""
+    function(params) {
+        if (params.value === 'Likely a Spam') {
+            return {'color': 'white', 'backgroundColor': 'darkred'};
+        } else {
+            return {'color': 'white', 'backgroundColor': 'darkgreen'};
+        }
+    };
+    """)
+
+    # Configure the AgGrid component
+    grid_options = {
+        'columnDefs': [
+            {'field': 'Sentence', 'filter': 'agTextColumnFilter', 'sortable': True, 'resizable': True},
+            {'field': 'Model', 'filter': 'agTextColumnFilter', 'sortable': True, 'resizable': True},
+            {'field': 'Prediction', 'cellStyle': cell_style_jscode, 'filter': 'agTextColumnFilter', 'sortable': True, 'resizable': True}
+        ],
+        'defaultColDef': {
+            'editable': False,
+            'filter': True,
+            'sortable': True,
+            'resizable': True
+        }
+    }
+
+    # Display the interactive dataframe
+    AgGrid(results_df, gridOptions=grid_options, update_mode=GridUpdateMode.MODEL_CHANGED, fit_columns_on_grid_load=True, theme='streamlit', allow_unsafe_jscode=True)
+
+# Clear session state when the app is reloaded
+if st.button("Clear Results"):
+    if 'results_df' in st.session_state:
+        del st.session_state['results_df']

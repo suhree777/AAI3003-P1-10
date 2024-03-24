@@ -21,3 +21,9 @@ xgboost
 nltk
 
 altair
+
+streamlit-aggrid
+
+matplotlib
+
+seaborn
