@@ -32,6 +32,8 @@ def display_title_and_description():
         """
         This project aims to conduct a performance analysis on Spam Detection through Natural Language Processing.
         It addresses the need for accurate detection, objective assessments, and efficient usage of resources in spam detection.
+        
+        Our Text Transformation function preprocesses the input text, including lowercasing, tokenisation, stemming, and removal of stopwords.
         """
     )
 

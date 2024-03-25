@@ -4,10 +4,10 @@ import pandas as pd
 from nltk.stem.porter import PorterStemmer
 import nltk
 from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizer, BertForSequenceClassification
 import torch
 from st_aggrid import AgGrid, GridUpdateMode, JsCode
+import altair as alt
 
 # Download necessary NLTK data
 nltk.download('punkt')
@@ -65,6 +65,29 @@ def predict_spam(sentence):
         results.append({'Model': model_name, 'Prediction': prediction_text})
     return results
 
+def get_filtered_data(grid_response):
+    # Use the response from the AgGrid to get the filtered data
+    return grid_response['data']
+
+def plot_chart(data):
+    # Calculate the proportion of sentences classified as spam by each model
+    spam_proportions = data.groupby('Model')['Prediction'].apply(lambda x: (x == 'Likely a Spam').mean()).reset_index(name='Spam Proportion')
+    
+    # Create an Altair chart
+    chart = alt.Chart(spam_proportions).mark_bar().encode(
+        x='Model',
+        y='Spam Proportion',
+        color='Model',
+        tooltip=['Model', 'Spam Proportion']
+    ).properties(
+        width=600,
+        height=400
+    )
+    
+    st.altair_chart(chart, use_container_width=True)
+
+
+
 # Streamlit app
 st.title("Spam Detection Demo")
 st.markdown("Enter a sentence or upload a CSV file with sentences for spam detection.")
@@ -76,7 +99,7 @@ if st.button("Predict") or 'results_df' in st.session_state:
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         if 'Sentence' in df.columns:
-            st.write("Results:")
+            st.write("### Prediction Results:")
             sentences = df['Sentence'].tolist()
         else:
             st.error("CSV file must have a column named 'Sentence'")
@@ -120,8 +143,20 @@ if st.button("Predict") or 'results_df' in st.session_state:
         }
     }
 
-    # Display the interactive dataframe
-    AgGrid(results_df, gridOptions=grid_options, update_mode=GridUpdateMode.MODEL_CHANGED, fit_columns_on_grid_load=True, theme='streamlit', allow_unsafe_jscode=True)
+    # # Display the interactive dataframe for predictions
+    grid_response = AgGrid(
+        results_df, 
+        gridOptions=grid_options, 
+        update_mode=GridUpdateMode.VALUE_CHANGED, 
+        fit_columns_on_grid_load=True, 
+        theme='streamlit', 
+        allow_unsafe_jscode=True,
+        data_return_mode='FILTERED',
+        key='predictions_grid'
+    )
+
+    # Plot the chart with the initial data
+    plot_chart(results_df)
 
 # Clear session state when the app is reloaded
 if st.button("Clear Results"):
