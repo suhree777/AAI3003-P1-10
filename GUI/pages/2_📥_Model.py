@@ -23,30 +23,44 @@ def transform_text(text):
     return " ".join(text)
 
 # Load the TfidfVectorizer and BERT model
-with open('extensive_training/tfid_vectorizer.pkl', 'rb') as file:
+with open('extensive_training/models/tfid_vectorizer.pkl', 'rb') as file:
     tfid = pickle.load(file)
 
 bert_tokenizer = BertTokenizer.from_pretrained('bert_model_files/')
 bert_model = BertForSequenceClassification.from_pretrained('bert_model_files/')
 
 def bert_predict(sentence):
-    inputs = bert_tokenizer(sentence, return_tensors='pt', padding=True, truncation=True, max_length=512)
+    # Encode the sentence using the BERT tokenizer
+    inputs = bert_tokenizer.encode_plus(
+        sentence, 
+        return_tensors='pt', 
+        max_length=64,  # Adjust based on your training settings
+        padding='max_length', 
+        truncation=True
+    )
+    input_ids = inputs['input_ids']
+    attention_mask = inputs['attention_mask']
+
+    # Get the prediction from the BERT model
     with torch.no_grad():
-        outputs = bert_model(**inputs)
-        prediction = torch.argmax(outputs.logits, dim=1).item()
+        outputs = bert_model(input_ids, attention_mask=attention_mask)
+        logits = outputs.logits
+        probabilities = torch.softmax(logits, dim=1)
+        prediction = torch.argmax(probabilities, dim=1).item()
+
     return 'Likely a Spam' if prediction == 1 else 'Likely Not a Spam'
 
 model_paths = {
-    'LogisticRegression': 'extensive_training/LR_model.pkl',
-    'SupportVectorMachine': 'extensive_training/SVC_model.pkl',
-    'MultinomialNB': 'extensive_training/NB_model.pkl',
-    'DecisionTreeClassifier': 'extensive_training/DT_model.pkl',
-    'AdaBoostClassifier': 'extensive_training/Adaboost_model.pkl',
-    'BaggingClassifier': 'extensive_training/Bgc_model.pkl',
-    'ExtraTreesClassifier': 'extensive_training/ETC_model.pkl',
-    'GradientBoostingClassifier': 'extensive_training/GBDT_model.pkl',
-    'XGBClassifier': 'extensive_training/xgb_model.pkl',
-    'RandomForestClassifier': 'extensive_training/RF_model.pkl',
+    'LogisticRegression': 'extensive_training/models/LR_model.pkl',
+    'SupportVectorMachine': 'extensive_training/models/SVC_model.pkl',
+    'MultinomialNB': 'extensive_training/models/NB_model.pkl',
+    'DecisionTreeClassifier': 'extensive_training/models/DT_model.pkl',
+    'AdaBoostClassifier': 'extensive_training/models/Adaboost_model.pkl',
+    'BaggingClassifier': 'extensive_training/models/Bgc_model.pkl',
+    'ExtraTreesClassifier': 'extensive_training/models/ETC_model.pkl',
+    'GradientBoostingClassifier': 'extensive_training/models/GBDT_model.pkl',
+    'XGBClassifier': 'extensive_training/models/xgb_model.pkl',
+    'RandomForestClassifier': 'extensive_training/models/RF_model.pkl',
     'BERT': 'bert'
 }
 
